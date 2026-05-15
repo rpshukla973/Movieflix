@@ -1,0 +1,38 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/movieflix}
+    username: ${SPRING_DATASOURCE_USERNAME:movie_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:movie_pass}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_AUTH:false}
+          starttls:
+            enable: ${MAIL_STARTTLS:false}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:U29tZVN1cGVyU2VjdXJlQmFzZTY0S2V5Rm9yTW92aWVmbGl4MTIzNDU2Nzg5MA==}
+    access-token-ttl-ms: ${JWT_ACCESS_TOKEN_TTL_MS:900000}
+  storage:
+    provider: ${STORAGE_PROVIDER:local}
+    local-path: ${STORAGE_LOCAL_PATH:./storage}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
