@@ -3,7 +3,7 @@ services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: Sp9411668277@
       MYSQL_DATABASE: movieflix
       MYSQL_USER: movie_user
       MYSQL_PASSWORD: movie_pass
@@ -21,11 +21,11 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8080:8080"
+      - "9090:9090"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/movieflix
-      - SPRING_DATASOURCE_USERNAME=movie_user
-      - SPRING_DATASOURCE_PASSWORD=movie_pass
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Sp9411668277@
       - JWT_SECRET=U29tZVN1cGVyU2VjdXJlQmFzZTY0S2V5Rm9yTW92aWVmbGl4MTIzNDU2Nzg5MA==
       - STORAGE_LOCAL_PATH=/app/storage
       - MAIL_HOST=mailhog
@@ -41,7 +41,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_BASE_URL=http://localhost:8080/api
+      - VITE_API_BASE_URL=http://localhost:9090/api
     depends_on:
       - backend
 

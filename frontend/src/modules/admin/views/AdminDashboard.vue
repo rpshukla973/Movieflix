@@ -53,16 +53,39 @@ const upload = async () => {
   error.value = "";
   message.value = "";
   try {
+    if (!videoFile.value) {
+      error.value = "Please select a video file";
+      return;
+    }
+
     const payload = new FormData();
-    payload.append("title", form.title);
-    payload.append("genre", form.genre);
-    payload.append("description", form.description);
-    if (videoFile.value) payload.append("video", videoFile.value);
+    payload.append("title", form.title || "Untitled");
+    payload.append("genre", form.genre || "General");
+    payload.append("description", form.description || "");
+    payload.append("video", videoFile.value);
     if (thumbnailFile.value) payload.append("thumbnail", thumbnailFile.value);
-    await api.post("/videos/upload", payload);
-    message.value = "Video uploaded successfully";
+
+    const token = localStorage.getItem("accessToken");
+    const response = await api.post("/videos/upload", payload, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (response?.status >= 200 && response?.status < 300) {
+      message.value = "Video uploaded successfully";
+      form.title = "";
+      form.genre = "";
+      form.description = "";
+      videoFile.value = null;
+      thumbnailFile.value = null;
+      const fileInputs = document.querySelectorAll('input[type="file"]');
+      fileInputs.forEach((input) => {
+        input.value = "";
+      });
+    }
   } catch (e) {
-    error.value = e.response?.data?.message || "Upload failed";
+    const backendMessage = e.response?.data?.message || e.response?.data?.error || e.message;
+    error.value = backendMessage || "Upload failed";
   }
 };
 

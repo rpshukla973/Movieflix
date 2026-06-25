@@ -12,6 +12,7 @@ import com.movieflix.service.OtpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -107,7 +108,13 @@ public class AuthServiceImpl implements AuthService {
         refreshToken.setExpiryDate(LocalDateTime.now().plusDays(7));
         refreshTokenRepository.save(refreshToken);
 
-        return new TokenResponse(accessToken, refreshToken.getToken(), "Bearer", jwtTokenProvider.getAccessTokenTtlMs());
+        return new TokenResponse(
+                accessToken,
+                refreshToken.getToken(),
+                "Bearer",
+                jwtTokenProvider.getAccessTokenTtlMs(),
+                user.getRoles().stream().map(role -> role.getName()).toList()
+        );
     }
 
     @Override
@@ -118,7 +125,13 @@ public class AuthServiceImpl implements AuthService {
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(refreshToken.getUser().getEmail(), null);
         String accessToken = jwtTokenProvider.generateAccessToken(authentication);
-        return new TokenResponse(accessToken, refreshToken.getToken(), "Bearer", jwtTokenProvider.getAccessTokenTtlMs());
+        return new TokenResponse(
+                accessToken,
+                refreshToken.getToken(),
+                "Bearer",
+                jwtTokenProvider.getAccessTokenTtlMs(),
+                refreshToken.getUser().getRoles().stream().map(role -> role.getName()).toList()
+        );
     }
 
     @Override

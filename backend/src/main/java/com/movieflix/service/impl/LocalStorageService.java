@@ -32,7 +32,7 @@ public class LocalStorageService implements StorageService {
             String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
             Path target = dir.resolve(fileName);
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-            return target.toString();
+            return folder + "/" + fileName;
         } catch (IOException ex) {
             throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to store file");
         }
@@ -41,14 +41,41 @@ public class LocalStorageService implements StorageService {
     @Override
     public Resource loadAsResource(String filePath) {
         try {
-            Path path = Path.of(filePath);
-            Resource resource = new UrlResource(path.toUri());
+            if (filePath == null || filePath.isBlank()) {
+                throw new ApiException(HttpStatus.NOT_FOUND, "File not found");
+            }
+
+            Path basePath = rootPath.toAbsolutePath().normalize();
+            String normalizedPath = normalizeStoredPath(filePath);
+            Path candidatePath = Path.of(normalizedPath);
+            Path resolvedPath = candidatePath.isAbsolute()
+                    ? candidatePath.normalize()
+                    : basePath.resolve(normalizedPath).normalize();
+
+            if (!resolvedPath.startsWith(basePath)) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid file path");
+            }
+
+            Resource resource = new UrlResource(resolvedPath.toUri());
             if (!resource.exists()) {
                 throw new ApiException(HttpStatus.NOT_FOUND, "File not found");
             }
             return resource;
         } catch (Exception ex) {
+            if (ex instanceof ApiException apiException) {
+                throw apiException;
+            }
             throw new ApiException(HttpStatus.NOT_FOUND, "File not found");
         }
+    }
+
+    private String normalizeStoredPath(String filePath) {
+        String normalized = filePath.replace('\\', '/');
+        normalized = normalized.replaceFirst("^\\./", "");
+        normalized = normalized.replaceFirst("^/", "");
+        if (normalized.startsWith("storage/")) {
+            normalized = normalized.substring("storage/".length());
+        }
+        return normalized;
     }
 }

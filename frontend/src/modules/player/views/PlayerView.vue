@@ -7,6 +7,7 @@
     <video
       ref="videoEl"
       controls
+      crossorigin="use-credentials"
       @timeupdate="syncWatchHistory(false)"
       @pause="syncWatchHistory(true)"
       @ended="syncWatchHistory(true)"
@@ -35,10 +36,12 @@ const lastSyncAt = ref(0);
 
 const selectedProfileId = computed(() => profileStore.selectedProfileId);
 const videoId = computed(() => Number(route.params.id));
-const streamUrl = computed(
-  () =>
-    `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api"}/videos/stream/${route.params.id}`,
-);
+const streamUrl = computed(() => {
+  const base = (import.meta.env.VITE_API_BASE_URL || "http://localhost:9090/api").replace(/\/$/, "");
+  const token = localStorage.getItem("accessToken");
+  const suffix = token ? `?token=${encodeURIComponent(token)}` : "";
+  return `${base}/videos/stream/${route.params.id}${suffix}`;
+});
 
 const syncWatchHistory = async (force) => {
   if (

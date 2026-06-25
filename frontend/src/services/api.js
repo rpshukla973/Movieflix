@@ -3,7 +3,7 @@ import axios from "axios";
 export const USE_MOCK_API = false;
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:9090/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -293,7 +293,10 @@ if (USE_MOCK_API) {
   api.interceptors.request.use((config) => {
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      config.headers = {
+        ...(config.headers || {}),
+        Authorization: `Bearer ${accessToken}`,
+      };
     }
     return config;
   });
@@ -309,7 +312,12 @@ if (USE_MOCK_API) {
           refreshToken,
         });
         localStorage.setItem("accessToken", data.accessToken);
-        original.headers.Authorization = `Bearer ${data.accessToken}`;
+        localStorage.setItem("refreshToken", data.refreshToken);
+        api.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
+        original.headers = {
+          ...(original.headers || {}),
+          Authorization: `Bearer ${data.accessToken}`,
+        };
         return api(original);
       }
       return Promise.reject(error);

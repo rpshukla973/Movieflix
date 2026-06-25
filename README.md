@@ -151,8 +151,8 @@ cd backend
 Endpoints:
 
 - Frontend: http://localhost:3000
-- Backend: http://localhost:8080
-- Swagger: http://localhost:8080/swagger-ui.html
+- Backend: http://localhost:9090
+- Swagger: http://localhost:9090/swagger-ui.html
 - MailHog UI: http://localhost:8025
 
 ## Environment Configuration

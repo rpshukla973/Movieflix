@@ -38,8 +38,12 @@ const error = ref("");
 
 const requestOtp = async () => {
   error.value = "";
-  await api.post("/auth/otp", { email: form.email, purpose: "SIGNUP" });
-  message.value = "OTP sent to email";
+  try {
+    await api.post("/auth/otp", { email: form.email, purpose: "SIGNUP" });
+    message.value = "OTP sent to email";
+  } catch (e) {
+    error.value = e.response?.data?.message || "Failed to send OTP";
+  }
 };
 
 const submit = async () => {

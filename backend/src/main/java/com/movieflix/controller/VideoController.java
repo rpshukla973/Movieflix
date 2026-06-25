@@ -1,11 +1,8 @@
 package com.movieflix.controller;
 
-import com.movieflix.entity.SubscriptionPlan;
 import com.movieflix.entity.Video;
 import com.movieflix.exception.ApiException;
-import com.movieflix.security.SubscriptionGuard;
 import com.movieflix.service.StorageService;
-import com.movieflix.service.UserContextService;
 import com.movieflix.service.VideoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -30,8 +27,6 @@ public class VideoController {
 
     private final VideoService videoService;
     private final StorageService storageService;
-    private final UserContextService userContextService;
-    private final SubscriptionGuard subscriptionGuard;
 
     @GetMapping
     public Page<Video> browse(
@@ -59,7 +54,6 @@ public class VideoController {
 
     @GetMapping("/stream/{id}")
     public ResponseEntity<?> stream(@PathVariable Long id, @RequestHeader HttpHeaders headers) {
-        subscriptionGuard.assertAccess(userContextService.getCurrentUser(), SubscriptionPlan.BASIC);
         Video video = videoService.getById(id);
         Resource resource = storageService.loadAsResource(video.getVideoPath());
 

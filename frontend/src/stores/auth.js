@@ -13,11 +13,11 @@ export const useAuthStore = defineStore("auth", {
     isAdmin: (state) => state.roles.includes("ROLE_ADMIN"),
   },
   actions: {
-    setSession(data, email) {
+    setSession(data, email, roles = []) {
       this.accessToken = data.accessToken;
       this.refreshToken = data.refreshToken;
       this.userEmail = email;
-      this.roles = ["ROLE_USER"];
+      this.roles = Array.isArray(roles) && roles.length ? roles : ["ROLE_USER"];
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("userEmail", email);
@@ -25,11 +25,13 @@ export const useAuthStore = defineStore("auth", {
     },
     async login(payload) {
       const { data } = await api.post("/auth/login", payload);
-      this.setSession(data, payload.email);
+      const roles = data.roles || [];
+      this.setSession(data, payload.email, roles);
     },
     async loginWithOtp(payload) {
       const { data } = await api.post("/auth/login/otp", payload);
-      this.setSession(data, payload.email);
+      const roles = data.roles || [];
+      this.setSession(data, payload.email, roles);
     },
     logout() {
       this.$reset();
